@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+spec:
+  selector:
+    matchLabels:
+      app: clickhouse
+  serviceName: "clickhouse-headless"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+    spec:
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:26.9.19
+        env:
+          - name: CLICKHOUSE_USER
+            value: "default"
+          - name: CLICKHOUSE_PASSWORD
+            value: "test"
+        ports:
+        - containerPort: 8123
+          name: clickhouse
+        volumeMounts:
+        - name: clickhouse-db
+          mountPath: /var/lib/clickhouse
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: clickhouse-init 
+  volumeClaimTemplates:
+  - metadata:
+      name: clickhouse-db
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "local-path"
+      resources:
+        requests:
+          storage: 1Gi

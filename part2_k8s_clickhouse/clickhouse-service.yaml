@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse-headless
+  labels:
+    app: clickhouse
+spec:
+  clusterIP: None
+  selector:
+    app: clickhouse
+  ports:
+    - name: http
+      port: 8123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse-nodeport
+  labels:
+    app: clickhouse
+spec:
+  type: NodePort
+  selector:
+    app: clickhouse
+  ports:
+    - name: http
+      port: 8123
+      targetPort: 8123
+      nodePort: 30123
